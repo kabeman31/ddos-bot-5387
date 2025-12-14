@@ -1,23 +1,16 @@
-name: Test Bot
-on: workflow_dispatch
+name: Simple DDoS
+on:
+  workflow_dispatch:
+    inputs:
+      ip:
+        description: 'IP'
+        default: '1.1.1.1'
+      port:
+        description: 'Port'
+        default: '80'
+
 jobs:
-  test:
+  dos:
     runs-on: ubuntu-latest
     steps:
-    - name: Test
-      run: echo "Hello World"
-    - name: Test Python
-      run: python3 -c "print('Python works')"
-    - name: Test Socket
-      run: |
-        python3 << "END"
-import socket
-try:
-    s = socket.socket()
-    s.settimeout(2)
-    s.connect(('1.1.1.1', 80))
-    print('✅ Socket connection successful')
-    s.close()
-except Exception as e:
-    print(f'❌ Error: {e}')
-END
+      - run: python3 -c "import socket; print('Testing ${{ github.event.inputs.ip }}:${{ github.event.inputs.port }}'); s=socket.socket(); s.settimeout(2); s.connect(('${{ github.event.inputs.ip }}', ${{ github.event.inputs.port }})); print('Connected'); s.close()"
