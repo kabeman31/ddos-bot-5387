@@ -1,31 +1,8 @@
-name: "DDoS Attack"
-on:
-  workflow_dispatch:
-    inputs:
-      target:
-        description: "Target URL or IP"
-        required: true
-        default: "httpbin.org"
-      mode:
-        description: "Attack Mode"
-        required: true
-        default: "http"
-        type: choice
-        options:
-          - http
-          - udp
-
+name: "DDoS Bot"
+on: workflow_dispatch
 jobs:
   attack:
     runs-on: ubuntu-latest
     steps:
-      - name: Show Target
-        run: echo "Target: $INPUT_TARGET"
-        env:
-          INPUT_TARGET: ${{ github.event.inputs.target }}
-      - name: Show Mode
-        run: echo "Mode: $INPUT_MODE"
-        env:
-          INPUT_MODE: ${{ github.event.inputs.mode }}
-      - name: Test Attack
-        run: python3 -c "print('Testing connection to 1.1.1.1:80'); import socket; s=socket.socket(); s.settimeout(2); s.connect(('1.1.1.1',80)); print('Connected'); s.close()"
+      - run: echo "Workflow started"
+      - run: python3 -c "print('Testing socket'); import socket; s=socket.socket(); s.settimeout(2); s.connect(('1.1.1.1',80)); print('Success'); s.close()"
