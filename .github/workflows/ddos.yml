@@ -19,6 +19,13 @@ jobs:
   attack:
     runs-on: ubuntu-latest
     steps:
-    - run: echo "Target: ${{ github.event.inputs.target }}"
-    - run: echo "Mode: ${{ github.event.inputs.mode }}"
-    - run: python3 -c "print('Attack starting...'); import socket; print('Testing 1.1.1.1:80'); s=socket.socket(); s.settimeout(2); s.connect(('1.1.1.1',80)); print('Connected'); s.close()"
+      - name: Show Target
+        run: echo "Target: $INPUT_TARGET"
+        env:
+          INPUT_TARGET: ${{ github.event.inputs.target }}
+      - name: Show Mode
+        run: echo "Mode: $INPUT_MODE"
+        env:
+          INPUT_MODE: ${{ github.event.inputs.mode }}
+      - name: Test Attack
+        run: python3 -c "print('Testing connection to 1.1.1.1:80'); import socket; s=socket.socket(); s.settimeout(2); s.connect(('1.1.1.1',80)); print('Connected'); s.close()"
